@@ -22,6 +22,8 @@ main()
     system_PrintString("Total sum: ");
     system_PrintInt(sum);
     system_PrintChar('\n');
+    system_PrintInt(system_GetTime());
+    system_PrintChar('\n');
     system_Exit(0);
     return 0;
 }
