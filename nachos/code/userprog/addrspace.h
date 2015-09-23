@@ -31,6 +31,10 @@ class AddrSpace {
     void SaveState();			// Save/restore address space-specific
     void RestoreState();		// info on a context switch 
 
+    unsigned int getNumPages();  // returns the number of virtual pages in
+                                    // address space
+    unsigned int getStartPhysPage(); // return the start address of the physical page
+
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
 					// for now!

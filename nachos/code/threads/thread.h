@@ -105,19 +105,21 @@ class NachOSThread {
     int getPID();
     int getPPID();
 
+    NachOSThread *parent;
+    int child_PIDs[];
+    int child_Count;
 
+    void ThreadStackAllocate(VoidFunctionPtr func, int arg);
+                        // Allocate a stack for thread.
+                    // Used internally by ThreadFork()
   private:
     // some of the private data for this class is listed above
     
     int* stack; 	 		// Bottom of the stack 
 					// NULL if this is the main thread
 					// (If NULL, don't deallocate stack)
-    ThreadStatus status;		// ready, running or blocked
     char* name;
 
-    void ThreadStackAllocate(VoidFunctionPtr func, int arg);
-    					// Allocate a stack for thread.
-					// Used internally by ThreadFork()
 
     int pid, ppid;			// My pid and my parent's pid
 
