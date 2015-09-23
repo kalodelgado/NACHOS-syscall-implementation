@@ -244,6 +244,32 @@ ExceptionHandler(ExceptionType which)
         currentThread->YieldCPU();
     }
 
+    else if((which == SyscallException) && (type == syscall_Sleep)){
+      // Advance program counters
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+
+        int WaitTime = machine->ReadRegister(4);
+
+        if(WaitTime==0){
+          //This will stop all interuppts when we are handling the sleep of this function
+          //Check interrupts.h for implementation
+          currentThread->YieldCPU();
+          //Yield it
+          //Start Interrupts again
+        }
+        else{
+          //SleepingQueue has been defined, freshly in system.cc as a global variable. system.cc : Line 23 
+          //Its implementation is incomplete. Yet is sufficient for purpose of sleep
+          //Implementation of SortedInsert is present in list.h
+          SleepingQueue->SortedInsert((void *)currentThread, stats->totalTicks + WaitTime);
+          IntStatus oldlevel=interrupt->SetLevel(IntOff);
+          currentThread->PutThreadToSleep();
+          interrupt->SetLevel(oldlevel); 
+        }
+    }
+
     else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);

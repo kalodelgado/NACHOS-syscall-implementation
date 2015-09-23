@@ -19,6 +19,11 @@ Statistics *stats;			// performance metrics
 Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 
+List *SleepingQueue; //This list maintains all the processes that are currently in sleep state
+                    //Implementation of Type List can be found in list.h && list.cc
+                    //Pleae proceed to TimerInterruptHandler(). It needs some serious working to be done.
+
+
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -61,10 +66,22 @@ extern void Cleanup();
 static void
 TimerInterruptHandler(int dummy)
 {
-    if (interrupt->getStatus() != IdleMode)
-	interrupt->YieldOnReturn();
-}
+    //if (interrupt->getStatus() != IdleMode)
+     //interrupt->YieldOnReturn();
 
+    if(SleepingQueue->IsEmpty()){
+        //Do Nothing when Timer Ticks
+        return;
+    }
+    else{
+        //Loop over the SleepingQueue for Valid Candidates that can be joined to the ready queue
+        while(!SleepingQueue->IsEmpty() && SleepingQueue->firstKey()<=stats->totalTicks){
+            int *keyPtr;
+            scheduler->ReadyToRun((NachOSThread *)SleepingQueue->SortedRemove(keyPtr));
+            //Method as defined in scheduler.cc 
+        }
+    }
+}
 //----------------------------------------------------------------------
 // Initialize
 // 	Initialize Nachos global data structures.  Interpret command

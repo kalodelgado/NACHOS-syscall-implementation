@@ -236,3 +236,7 @@ List::SortedRemove(int *keyPtr)
     return thing;
 }
 
+int
+List::firstKey(){
+    return first->key;
+}
