@@ -88,7 +88,7 @@ class NachOSThread {
 					// is called
 
     // basic thread operations
-
+    static int pCount;
     void ThreadFork(VoidFunctionPtr func, int arg); 	// Make thread run (*func)(arg)
     void YieldCPU();  				// Relinquish the CPU if any 
 						// other thread is runnable
@@ -101,6 +101,10 @@ class NachOSThread {
     void setStatus(ThreadStatus st) { status = st; }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
+
+    int getPID();
+    int getPPID();
+
 
   private:
     // some of the private data for this class is listed above
