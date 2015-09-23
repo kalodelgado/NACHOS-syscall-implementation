@@ -157,7 +157,94 @@ ExceptionHandler(ExceptionType which)
        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
-    } else {
+    } 
+
+    else if((which == SyscallException) && (type == syscall_GetReg)){
+       machine->WriteRegister(2,machine->ReadRegister(machine->ReadRegister(4)));
+       machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+       machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+       machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4); 
+    }
+
+    else if((which == SyscallException) && (type == syscall_GetPA)){
+      unsigned virtAddress = machine->ReadRegister(4);
+      unsigned vpn = (unsigned)virtAddress/PageSize;
+
+      
+      //vpn --- Virtual Page Numer (See translation.cc line:210)
+
+      //The virtual page number is not larger than the number of entries in the page table. 
+      if(vpn > machine->pageTableSize){
+        machine->WriteRegister(2,-1);     
+      }
+
+    //The page table entry has the valid field set to true indicating that the entry holds a valid physical page number.      
+      if (!machine->pageTable[vpn].valid)
+      {
+        machine->WriteRegister(2,-1);
+      }
+
+      //The obtained physical page number (physicalPage field of the page table entry) is not larger than the number of physical pages.
+      if (machine->pageTable[vpn].physicalPage > NumPhysPages)
+      {
+        machine->WriteRegister(2,-1);
+      }
+
+      else
+      {
+        machine->WriteRegister(2,((machine->pageTable[vpn].physicalPage)*PageSize) + (virtAddress%PageSize));
+      }
+
+      //Advance Program Counters
+      machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+      machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+      machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    }
+
+    else if((which == SyscallException) && (type == syscall_Time)){
+      machine->WriteRegister(2,stats->totalTicks);
+      //stats is a global variable of class Statistics(see stats.h) which has been declared in code/threads/System.h and system.cc. please refer
+      //Refer to machine/interrupt.cc to see how stats->totalticks works! Line 155 to be precise :P
+
+      //Advance Program Counters
+      machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+      machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+      machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    
+    }
+
+
+    //Implementation of GetPID and GetPPID from thread.cc and thread.h? Confused :(
+    else if ((which == SyscallException) && (type == syscall_GetPID)) {
+        machine->WriteRegister(2, currentThread->getPID());
+
+        // Advance program counters
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    } 
+    else if ((which == SyscallException) && (type == syscall_GetPPID)) {
+        machine->WriteRegister(2, currentThread->getPPID());
+
+        // Advance program counters
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+    }
+    //Hehehehe IKR its!
+
+
+    else if((which == SyscallException) && (type == syscall_Yield)){
+      // Advance program counters
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+
+        //Already present in thread.cc
+        currentThread->YieldCPU();
+    }
+
+    else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
     }
