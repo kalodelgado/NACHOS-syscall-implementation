@@ -51,6 +51,10 @@
 #define MachineStateSize 18 
 
 
+#define PARENT_WAITING -1
+#define CHILD_LIVE 1
+#define CHILD_NOT_FOUND 0
+
 // Size of the thread's private execution stack.
 // WATCH OUT IF THIS ISN'T BIG ENOUGH!!!!!
 #define StackSize	(4 * 1024)	// in words
@@ -105,7 +109,14 @@ class NachOSThread {
     int getPID();
     int getPPID();
 
+    NachOSThread *parent;
+    int child_PIDs[];
+    int child_Status[];
+    int child_Count;
 
+    void ThreadStackAllocate(VoidFunctionPtr func, int arg);
+                        // Allocate a stack for thread.
+                    // Used internally by ThreadFork()
   private:
     // some of the private data for this class is listed above
     
@@ -115,9 +126,6 @@ class NachOSThread {
     ThreadStatus status;		// ready, running or blocked
     char* name;
 
-    void ThreadStackAllocate(VoidFunctionPtr func, int arg);
-    					// Allocate a stack for thread.
-					// Used internally by ThreadFork()
 
     int pid, ppid;			// My pid and my parent's pid
 
