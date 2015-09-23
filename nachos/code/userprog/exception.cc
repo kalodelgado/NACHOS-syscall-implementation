@@ -233,6 +233,7 @@ ExceptionHandler(ExceptionType which)
     }
     //Hehehehe IKR its!
 
+<<<<<<< HEAD
 
     else if((which == SyscallException) && (type == syscall_Yield)){
       // Advance program counters
@@ -270,6 +271,8 @@ ExceptionHandler(ExceptionType which)
         }
     }
 
+=======
+>>>>>>> 2f055f7bf24e467367f86ca89631b80de76d73de
     else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);
