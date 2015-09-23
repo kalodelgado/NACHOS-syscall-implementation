@@ -32,16 +32,51 @@
 //	"threadName" is an arbitrary string, useful for debugging.
 //----------------------------------------------------------------------
 
+int NachOSThread::pCount=0;
+
+
 NachOSThread::NachOSThread(char* threadName)
 {
     name = threadName;
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
+
+    pCount++;
+    pid=pCount;
+
+    if(pid == 1) {
+        ppid = 0;
+    } else {
+        ppid = currentThread->getPID();
+    }
+
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
 }
+
+
+//----------------------------------------------------------------------
+// NachOSThread:getPID
+// returns the PID of the current thread
+//----------------------------------------------------------------------
+
+int NachOSThread::getPID()
+{
+    return pid;
+}
+
+//----------------------------------------------------------------------
+// NachOSThread:getPPID
+// returns the PPID of the current thread
+//----------------------------------------------------------------------
+
+int NachOSThread::getPPID()
+{
+    return ppid;
+}
+
 
 //----------------------------------------------------------------------
 // NachOSThread::~NachOSThread
