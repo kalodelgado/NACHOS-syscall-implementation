@@ -73,7 +73,8 @@ TimerInterruptHandler(int dummy)
         //Do Nothing when Timer Ticks
         return;
     }
-    else{int *keyPtr;
+    else{
+    	int *keyPtr;
         //Loop over the SleepingQueue for Valid Candidates that can be joined to the ready queue
         while(!SleepingQueue->IsEmpty() && SleepingQueue->First() <= stats->totalTicks){
             

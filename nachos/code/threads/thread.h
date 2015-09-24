@@ -151,4 +151,5 @@ void _ThreadRoot();
 void _SWITCH(NachOSThread *oldThread, NachOSThread *newThread);
 }
 
+void myFunction(int arg);
 #endif // THREAD_H

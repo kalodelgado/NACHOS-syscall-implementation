@@ -24,7 +24,7 @@ class AddrSpace {
 					// initializing it with the program
 					// stored in the file "executable"
     ~AddrSpace();			// De-allocate an address space
-    AddrSpace(unsigned int numParentPages, unsigned int parentStartPhysPage);
+    AddrSpace(unsigned int numParentPages, unsigned int parentStartPhysPage); //New function to allocate in case of fork
     void InitRegisters();		// Initialize user-level CPU registers,
 					// before jumping to user code
 

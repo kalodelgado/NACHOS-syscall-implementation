@@ -293,8 +293,11 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(2,child->getPID());
 
         //Allocate a stack to child
-
+        child->ThreadStackAllocate(&myFunction,0);
         //But how?
+
+        //WHy you do this? I was told to do so in the assignment :( 
+        machine->Run();
 
         IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
         scheduler->ReadyToRun(child);
