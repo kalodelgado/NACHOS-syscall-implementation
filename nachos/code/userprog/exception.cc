@@ -298,11 +298,26 @@ ExceptionHandler(ExceptionType which)
 
         //WHy you do this? I was told to do so in the assignment :( 
         machine->Run();
+        //Well this thing apparently swithces back to user from kernel
 
         IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
         scheduler->ReadyToRun(child);
         (void) interrupt->SetLevel(oldLevel); // re-enable interrupts
 
+    }
+    else if((which == SyscallException) && (type == syscall_Fork)){
+        //I assume there is something called filename :(
+        //where do I find
+        Openfile *executable = filesystem->Openfile(filename);
+        AddrSpace *space;
+        space = new AddrSpace(executable);
+        currentThread->space=space;
+
+        space->InitRegisters();
+        space->RestoreState();
+        machine->Run();
+
+        //no more incrementing count :)
     }
     else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
