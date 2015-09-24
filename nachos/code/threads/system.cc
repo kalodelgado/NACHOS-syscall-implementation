@@ -73,10 +73,10 @@ TimerInterruptHandler(int dummy)
         //Do Nothing when Timer Ticks
         return;
     }
-    else{
+    else{int *keyPtr;
         //Loop over the SleepingQueue for Valid Candidates that can be joined to the ready queue
-        while(!SleepingQueue->IsEmpty() && SleepingQueue->firstKey()<=stats->totalTicks){
-            int *keyPtr;
+        while(!SleepingQueue->IsEmpty() && SleepingQueue->First() <= stats->totalTicks){
+            
             scheduler->ReadyToRun((NachOSThread *)SleepingQueue->SortedRemove(keyPtr));
             //Method as defined in scheduler.cc 
         }

@@ -235,8 +235,7 @@ List::SortedRemove(int *keyPtr)
     delete element;
     return thing;
 }
-
-int
-List::firstKey(){
+int 
+List::First(){
     return first->key;
 }

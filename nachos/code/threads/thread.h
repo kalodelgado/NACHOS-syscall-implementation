@@ -119,7 +119,7 @@ class NachOSThread {
 					// NULL if this is the main thread
 					// (If NULL, don't deallocate stack)
     char* name;
-
+    ThreadStatus status;
 
     int pid, ppid;			// My pid and my parent's pid
 

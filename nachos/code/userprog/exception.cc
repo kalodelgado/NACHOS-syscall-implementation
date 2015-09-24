@@ -282,10 +282,10 @@ ExceptionHandler(ExceptionType which)
         child->parent = currentThread;
         
         //Update Parameters in parent
-        currentThread->child_PIDs[child_Count]=child->getPID();
+        currentThread->child_PIDs[currentThread->child_Count]=child->getPID();
         currentThread->child_Count++;
 
-        child->space=new AddrSpaceFork(currentThread->space->getNumPages(),currentThread->space->getStartPhysPage());
+        child->space=new AddrSpace(currentThread->space->getNumPages(),currentThread->space->getStartPhysPage());
 
         machine->WriteRegister(2,0);
         child->SaveUserState(); //LOL

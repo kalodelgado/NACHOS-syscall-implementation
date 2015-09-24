@@ -124,8 +124,9 @@ AddrSpace::AddrSpace(OpenFile *executable)
 }
 
 //A new function to allocate space for user programs
-AddrSpace::AddrSpaceFork(unsigned int numParentPages, unsigned int parentStartPhysPage)
+AddrSpace::AddrSpace(unsigned int numParentPages, unsigned int parentStartPhysPage)
 {
+    unsigned int size,i,j;
     numPages=numParentPages;
     size=numPages*PageSize;
 
@@ -150,7 +151,7 @@ AddrSpace::AddrSpaceFork(unsigned int numParentPages, unsigned int parentStartPh
                     // pages to be read-only
     }
     
-    unsigned int i,j;
+    //unsigned int i,j;
     i=parentStartPhysPage*PageSize;
     j=totalPages*PageSize;
     while(i<((parentStartPhysPage+numPages)*PageSize)){
