@@ -275,18 +275,18 @@ ExceptionHandler(ExceptionType which)
         machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
         machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
 
-        //Create a child
+         //Create a child
         NachOSThread *child = new NachOSThread("Forked Thread");
-        
+        printf("Succesfully created a new NachOSThread\n");
         //Initialize the child
         child->parent = currentThread;
         
         //Update Parameters in parent
         currentThread->child_PIDs[currentThread->child_Count]=child->getPID();
         currentThread->child_Count++;
-
+        printf("Done with assignment\n");
         child->space=new AddrSpace(currentThread->space->getNumPages(),currentThread->space->getStartPhysPage());
-
+        printf("Succesfully created a new AddrSpace\n");
         machine->WriteRegister(2,0);
         child->SaveUserState(); //LOL
 
@@ -295,15 +295,15 @@ ExceptionHandler(ExceptionType which)
         //Allocate a stack to child
         child->ThreadStackAllocate(&myFunction,0);
         //But how?
-
+        printf("Succesfully Allocated child stack\n");
         //WHy you do this? I was told to do so in the assignment :( 
-        machine->Run();
-        //Well this thing apparently swithces back to user from kernel
-
         IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
         scheduler->ReadyToRun(child);
         (void) interrupt->SetLevel(oldLevel); // re-enable interrupts
 
+        //Well this thing apparently swithces back to user from kernel
+        printf("Returning control to raw programs\n");
+        
     }
     // else if((which == SyscallException) && (type == syscall_Exec)){
     //     //I assume there is something called filename :(

@@ -372,4 +372,6 @@ void myFunction(int arg){
         currentThread->space->RestoreState();
         }
     #endif
+        machine->Run();
+        
 }
