@@ -130,7 +130,7 @@ ExceptionHandler(ExceptionType which)
        vaddr = machine->ReadRegister(4);
        machine->ReadMem(vaddr, 1, &memval);
        while ((*(char*)&memval) != '\0') {
-	  writeDone->P() ;
+          writeDone->P() ;
           console->PutChar(*(char*)&memval);
           vaddr++;
           machine->ReadMem(vaddr, 1, &memval);
@@ -305,18 +305,25 @@ ExceptionHandler(ExceptionType which)
         (void) interrupt->SetLevel(oldLevel); // re-enable interrupts
 
     }
-    else if((which == SyscallException) && (type == syscall_Fork)){
+    else if((which == SyscallException) && (type == syscall_Exec)){
         //I assume there is something called filename :(
         //where do I find
-        Openfile *executable = filesystem->Openfile(filename);
+        Openfile *executable = filesystem->Openfile(machine->ReadRegister(4));
+        /*if (executable == NULL) {
+          printf("Unable to open file %s\n", filename);
+          return;
+        }*/
         AddrSpace *space;
         space = new AddrSpace(executable);
         currentThread->space=space;
 
         space->InitRegisters();
         space->RestoreState();
+        delete executable;
         machine->Run();
-
+        //ASSERT(FALSE);      // machine->Run never returns;
+          // the address space exits
+          // by doing the syscall "exit"
         //no more incrementing count :)
     }
     else {
