@@ -11,6 +11,12 @@ main()
     system_PrintString("Physical address of array[50]: ");
     system_PrintInt(system_GetPA(&array[50]));
     system_PrintChar('\n');
+    system_PrintString("Current time: ");
+    system_PrintInt(system_GetTime());
+    system_PrintChar('\n');
+    system_PrintInt(system_GetTime());
+    system_Sleep(5000);
+    system_PrintInt(system_GetTime());
     system_PrintString("Current physical address of stack top: ");
     system_PrintInt(system_GetPA(system_GetReg(29)));
     system_PrintChar('\n');

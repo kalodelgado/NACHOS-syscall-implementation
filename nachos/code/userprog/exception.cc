@@ -305,47 +305,47 @@ ExceptionHandler(ExceptionType which)
         (void) interrupt->SetLevel(oldLevel); // re-enable interrupts
 
     }
-    else if((which == SyscallException) && (type == syscall_Exec)){
-        //I assume there is something called filename :(
-        //where do I find
+    // else if((which == SyscallException) && (type == syscall_Exec)){
+    //     //I assume there is something called filename :(
+    //     //where do I find
 
-        //refer to line 130 above to know how to read from memory
-        char filename[100];
-        int i=0;
+    //     //refer to line 130 above to know how to read from memory
+    //     char filename[100];
+    //     int i=0;
 
-        vaddr = machine->ReadRegister(4);
-        machine->ReadMem(vaddr, 1, &memval);
-        while ((*(char*)&memval) != '\0') {
-            filename[i]  = (char)memval;
-            ++i;
-            vaddr++;
-            machine->ReadMem(vaddr, 1, &memval);
-        }
-        filename[i]  = (char)memval;
-        //This by far is weirdestthing that has been copied
+    //     vaddr = machine->ReadRegister(4);
+    //     machine->ReadMem(vaddr, 1, &memval);
+    //     while ((*(char*)&memval) != '\0') {
+    //         filename[i]  = (char)memval;
+    //         ++i;
+    //         vaddr++;
+    //         machine->ReadMem(vaddr, 1, &memval);
+    //     }
+    //     filename[i]  = (char)memval;
+    //     //This by far is weirdestthing that has been copied
 
-        if (executable == NULL) {
-          printf("Unable to open file %s\n", filename);
-          return;
-        }
+    //     if (executable == NULL) {
+    //       printf("Unable to open file %s\n", filename);
+    //       return;
+    //     }
 
 
-        Openfile *executable = filesystem->Openfile(machine->ReadRegister(4));
+    //     Openfile *executable = filesystem->Openfile(machine->ReadRegister(4));
         
-        AddrSpace *space;
-        space = new AddrSpace(executable);
-        currentThread->space=space;
+    //     AddrSpace *space;
+    //     space = new AddrSpace(executable);
+    //     currentThread->space=space;
 
-        space->InitRegisters();
-        space->RestoreState();
-        delete executable;
-        machine->Run();
-        ASSERT(FALSE);      
-        // machine->Run never returns;
-          // the address space exits
-          // by doing the syscall "exit"
-        //no more incrementing count :)
-    }
+    //     space->InitRegisters();
+    //     space->RestoreState();
+    //     delete executable;
+    //     machine->Run();
+    //     ASSERT(FALSE);      
+    //     // machine->Run never returns;
+    //       // the address space exits
+    //       // by doing the syscall "exit"
+    //     //no more incrementing count :)
+    // }
     else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);

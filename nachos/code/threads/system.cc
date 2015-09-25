@@ -156,7 +156,7 @@ Initialize(int argc, char **argv)
     scheduler = new Scheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
 	timer = new Timer(TimerInterruptHandler, 0, randomYield);
-
+    SleepingQueue = new List();
     threadToBeDestroyed = NULL;
 
     // We didn't explicitly allocate the current thread we are running in.
