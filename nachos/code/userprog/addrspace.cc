@@ -129,17 +129,18 @@ AddrSpace::AddrSpace(unsigned int numParentPages, unsigned int parentStartPhysPa
     unsigned int size,i,j;
     numPages=numParentPages;
     size=numPages*PageSize;
-
+   // printf("Inside AddrManiSpace\n");
     ASSERT(numPages + totalPages <= NumPhysPages);      // check we're not trying
                         // to run anything too big --
                         // at least until we have
                         // virtual memory
-
+   // printf("Assert is true\n");
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
                     numPages, size);
 
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
+   // printf("pageTable created\n");
     for (i = 0; i < numPages; i++) {
     pageTable[i].virtualPage = i;   // for now, virtual page # = phys page #
     pageTable[i].physicalPage = i+totalPages;
@@ -150,14 +151,16 @@ AddrSpace::AddrSpace(unsigned int numParentPages, unsigned int parentStartPhysPa
                     // a separate page, we could set its 
                     // pages to be read-only
     }
-    
+    //printf("pageTable setup is complete\n");
     //unsigned int i,j;
     i=parentStartPhysPage*PageSize;
     j=totalPages*PageSize;
     while(i<((parentStartPhysPage+numPages)*PageSize)){
         machine->mainMemory[j]=machine->mainMemory[i];
+        j++; i++;
     }
     totalPages=totalPages+numPages;
+    //printf("finally, done with addrmanispace\n");
 }
 
 //----------------------------------------------------------------------

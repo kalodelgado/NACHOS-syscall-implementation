@@ -277,16 +277,16 @@ ExceptionHandler(ExceptionType which)
 
          //Create a child
         NachOSThread *child = new NachOSThread("Forked Thread");
-        printf("Succesfully created a new NachOSThread\n");
+        //printf("Succesfully created a new NachOSThread\n");
         //Initialize the child
+        currentThread->ChildThreadPointer->SortedInsert((void *)child,child->getPID());
         child->parent = currentThread;
-        
+        currentThread->NumberOfChildren++;
+        currentThread->Child_Status[child->getPID()]=1;
         //Update Parameters in parent
-        currentThread->child_PIDs[currentThread->child_Count]=child->getPID();
-        currentThread->child_Count++;
-        printf("Done with assignment\n");
+        //printf("Done with assignment\n");
         child->space=new AddrSpace(currentThread->space->getNumPages(),currentThread->space->getStartPhysPage());
-        printf("Succesfully created a new AddrSpace\n");
+        //printf("Succesfully created a new AddrSpace\n");
         machine->WriteRegister(2,0);
         child->SaveUserState(); //LOL
 
@@ -295,14 +295,14 @@ ExceptionHandler(ExceptionType which)
         //Allocate a stack to child
         child->ThreadStackAllocate(&myFunction,0);
         //But how?
-        printf("Succesfully Allocated child stack\n");
+        //printf("Succesfully Allocated child stack\n");
         //WHy you do this? I was told to do so in the assignment :( 
         IntStatus oldLevel = interrupt->SetLevel(IntOff); // disable interrupts
         scheduler->ReadyToRun(child);
         (void) interrupt->SetLevel(oldLevel); // re-enable interrupts
 
         //Well this thing apparently swithces back to user from kernel
-        printf("Returning control to raw programs\n");
+        //printf("Returning control to raw programs\n");
         
     }
     else if((which == SyscallException) && (type == syscall_Exec)){
@@ -322,7 +322,7 @@ ExceptionHandler(ExceptionType which)
             machine->ReadMem(vaddr, 1, &memval);
         }
         filename[i]  = (char)memval;
-        //This by far is weirdestthing that has been copied
+        // //This by far is weirdestthing that has been copied
 
         if (filename == NULL) {
           printf("Unable to open file %s\n", filename);
@@ -330,15 +330,12 @@ ExceptionHandler(ExceptionType which)
         }
 
 
-        Openfile *executable = fileSystem->Open(filename);
+        OpenFile *executable = fileSystem->Open(filename);
+        
         AddrSpace *space;
-        if (filename == NULL) {
-          printf("Unable to open file %s\n", filename);
-          return;
-        }
         space = new AddrSpace(executable);
         currentThread->space=space;
-        delete executable;
+delete executable;
         space->InitRegisters();
         space->RestoreState();
         
@@ -349,6 +346,56 @@ ExceptionHandler(ExceptionType which)
           // by doing the syscall "exit"
         //no more incrementing count :)
     }
+    else if((which == SyscallException) && (type == syscall_Exit)){
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+        int i;
+        
+        //RemoveChild function basically assigns the parent of all child to NULL and 
+        //assigns the ppid's of childs to be 0. i.e. attaches them to root.
+        currentThread->ChildThreadPointer->RemoveChild();
+        if(currentThread->parent!=NULL){
+        ////SetNull Takes a pid, removes it's thread pointer from the child list of his parent(ChildThreadPointer defined in thread.h). 
+        currentThread->parent->ChildThreadPointer->SetNULL(currentThread->getPID());        
+        currentThread->parent->Child_Status[currentThread->getPID()]=0;
+        currentThread->parent->Child_ReturnValues[currentThread->getPID()]=machine->ReadRegister(4);
+        WaitingQueue->RemovePid(currentThread->getPID()); // Schedule Parent Process if waiting for this child to terminate.
+      }
+
+        currentThread->FinishThread();
+    }
+    else if((which == SyscallException) && (type == syscall_Join)){
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+        
+        int pid = machine->ReadRegister(4);
+        if(currentThread->Child_Status[pid]==-1){
+          machine->WriteRegister(2,-1);
+        }
+        else if(currentThread->Child_Status[pid]==0){
+          machine->WriteRegister(2,currentThread->Child_ReturnValues[pid]);
+        }
+        else{
+          currentThread->WaitingFor=pid;
+          WaitingQueue->SortedInsert((void *)currentThread, pid); // Insert currentthread to waiting queue as child not yet terminated.
+          IntStatus oldlevel=interrupt->SetLevel(IntOff);
+          currentThread->PutThreadToSleep();
+          interrupt->SetLevel(oldlevel); 
+        }
+
+    }
+    else if((which == SyscallException) && (type == syscall_NumInstr)){
+        machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+        machine->WriteRegister(PCReg, machine->ReadRegister(NextPCReg));
+        
+        machine->WriteRegister(NextPCReg, machine->ReadRegister(NextPCReg)+4);
+        machine->WriteRegister(2,currentThread->numInst);
+
+    }    
     else {
 	printf("Unexpected user mode exception %d %d\n", which, type);
 	ASSERT(FALSE);

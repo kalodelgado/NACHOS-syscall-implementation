@@ -23,7 +23,7 @@ List *SleepingQueue; //This list maintains all the processes that are currently 
                     //Implementation of Type List can be found in list.h && list.cc
                     //Pleae proceed to TimerInterruptHandler(). It needs some serious working to be done.
 
-
+List *WaitingQueue; //This list maintains all the process that are currently currently waiting for termination of any of his childs.
 #ifdef FILESYS_NEEDED
 FileSystem  *fileSystem;
 #endif
@@ -66,19 +66,19 @@ extern void Cleanup();
 static void
 TimerInterruptHandler(int dummy)
 {
-    //if (interrupt->getStatus() != IdleMode)
-     //interrupt->YieldOnReturn();
+    if (interrupt->getStatus() != IdleMode)
+     interrupt->YieldOnReturn();
 
     if(SleepingQueue->IsEmpty()){
         //Do Nothing when Timer Ticks
         return;
     }
     else{
-    	int *keyPtr;
+    //	int *keyPtr;
         //Loop over the SleepingQueue for Valid Candidates that can be joined to the ready queue
         while(!SleepingQueue->IsEmpty() && SleepingQueue->First() <= stats->totalTicks){
             
-            scheduler->ReadyToRun((NachOSThread *)SleepingQueue->SortedRemove(keyPtr));
+            scheduler->ReadyToRun((NachOSThread *)SleepingQueue->SortedRemove(NULL));
             //Method as defined in scheduler.cc 
         }
     }
@@ -156,7 +156,8 @@ Initialize(int argc, char **argv)
     scheduler = new Scheduler();		// initialize the ready queue
     //if (randomYield)				// start the timer (if needed)
 	timer = new Timer(TimerInterruptHandler, 0, randomYield);
-    SleepingQueue = new List();
+    SleepingQueue = new List();  //Global Intialisation of SleepingQueue.
+    WaitingQueue = new List();  
     threadToBeDestroyed = NULL;
 
     // We didn't explicitly allocate the current thread we are running in.

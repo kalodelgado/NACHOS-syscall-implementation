@@ -18,6 +18,7 @@
 #include "copyright.h"
 #include "list.h"
 
+#include "system.h"
 //----------------------------------------------------------------------
 // ListElement::ListElement
 // 	Initialize a list element, so it can be added somewhere on a list.
@@ -200,6 +201,116 @@ List::SortedInsert(void *item, int sortKey)
 	last = element;
     }
 }
+
+
+// If a parent terminates, then it calls the remove child function. 
+//RemoveChild function basically assigns the parent of all child to NULL and 
+//assigns the ppid's of childs to be 0. i.e. attaches them to root.
+void
+List::RemoveChild()
+{
+    ListElement *ptr;
+    int temp;
+    if(first==NULL)
+        return;
+    for (ptr = first; ptr->next != NULL; ptr = ptr->next) {           
+           ((NachOSThread *) ptr->item)->parent =NULL;
+           temp = ((NachOSThread *) ptr->item)->getPPID();
+        }    
+}
+
+// Searches for a process which is waiting for given pid in waitingQueue, deletes it and adds the parent thread corresponding to given thread in to ReadyList.
+void
+List::RemovePid(int pid)
+{ 
+    ListElement *ptr;
+    ListElement *prev;
+    if(first==NULL)
+        return ;
+    prev=first;
+    
+    ptr=first->next;
+    if(prev->key==pid)
+        {
+            if(prev==first)
+            {
+                if (first == last) { 
+                        first = NULL;
+                        last = NULL;
+                } else {
+                    first = first->next;
+                }
+                scheduler->ReadyToRun((NachOSThread *)prev->item);
+                first=prev->next;
+                delete prev;
+            }
+        }
+            else{    
+                while(ptr!=NULL)
+                {
+                        if(ptr->key==pid){
+                            if(ptr==last)
+                            {
+                                last=prev;
+                            }
+                            scheduler->ReadyToRun((NachOSThread *)ptr->item);
+                            prev->next=ptr->next;
+                            delete ptr;
+                            break;
+                        }
+                        prev=ptr;
+                         ptr=ptr->next;
+                }   
+            }
+        
+    return ;
+}
+
+//Takes a pid, removes it's thread pointer from the child list(ChildThreadPointer defined in thread.h) of his parent.
+void
+List::SetNULL(int pid)
+{
+    ListElement *ptr;
+    ListElement *prev;
+    if(first==NULL)
+        return ;
+    prev=first;
+    
+    ptr=first->next;
+    if(prev->key==pid)
+        {
+            if(prev==first)
+            {
+                if (first == last) { 
+                        first = NULL;
+                        last = NULL;
+                } else {
+                    first = first->next;
+                }
+                first=prev->next;
+                delete prev;
+            }
+        }
+            else{    
+                while(ptr!=NULL)
+                {
+                        if(ptr->key==pid){
+                            if(ptr==last)
+                            {
+                                last=prev;
+                            }
+                            prev->next=ptr->next;
+                            delete ptr;
+                            break;
+                        }
+                        prev=ptr;
+                         ptr=ptr->next;
+                }   
+            }
+        
+    return ;
+}
+
 
 //----------------------------------------------------------------------
 // List::SortedRemove

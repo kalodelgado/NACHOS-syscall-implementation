@@ -19,7 +19,7 @@
 #include "switch.h"
 #include "synch.h"
 #include "system.h"
-
+#include "machine.h"
 #define STACK_FENCEPOST 0xdeadbeef	// this is put at the top of the
 					// execution stack, for detecting 
 					// stack overflows
@@ -33,18 +33,24 @@
 //----------------------------------------------------------------------
 
 int NachOSThread::pCount=0;
-
+int NachOSThread::threadCount = 0;
 
 NachOSThread::NachOSThread(char* threadName)
 {
-    name = threadName;
+    numInst=0;  //For storing total number of instructions executed by this thread.
+    name = threadName; 
     stackTop = NULL;
     stack = NULL;
     status = JUST_CREATED;
-
-    pCount++;
+    pCount++;  //For incrementing total number of process created till now.
+    threadCount++;  //Stores count of total number of currently executing processes.
     pid=pCount;
-
+    WaitingFor=-1;
+    parent=NULL;
+    ChildThreadPointer = new List();        //Stores ThreadPointers of all the childs.
+    int i=0;
+    for(i=0;i<40;i++) Child_Status[i]=-1;
+    NumberOfChildren=0;
     if(pid == 1) {
         ppid = 0;
     } else {
@@ -74,8 +80,11 @@ int NachOSThread::getPID()
 
 int NachOSThread::getPPID()
 {
+    if(currentThread->parent==NULL)
+        ppid=0;
     return ppid;
 }
+
 
 
 //----------------------------------------------------------------------
@@ -180,11 +189,18 @@ NachOSThread::FinishThread ()
 {
     (void) interrupt->SetLevel(IntOff);		
     ASSERT(this == currentThread);
-    
+    //printf("destroying thread\n");
     DEBUG('t', "Finishing thread \"%s\"\n", getName());
-    
     threadToBeDestroyed = currentThread;
-    PutThreadToSleep();					// invokes SWITCH
+    if(threadCount>1){
+    //  printf("destroying thread again\n");
+
+        threadCount--;
+        PutThreadToSleep();
+    }
+    else
+    	Cleanup();
+	// invokes SWITCH
     // not reached
 }
 
@@ -247,16 +263,16 @@ void
 NachOSThread::PutThreadToSleep ()
 {
     NachOSThread *nextThread;
-    
+     //printf("Yes fa\n");
     ASSERT(this == currentThread);
     ASSERT(interrupt->getLevel() == IntOff);
     
     DEBUG('t', "Sleeping thread \"%s\"\n", getName());
 
-    status = BLOCKED;
+    status = BLOCKED; 
     while ((nextThread = scheduler->FindNextToRun()) == NULL)
 	interrupt->Idle();	// no one to run, wait for an interrupt
-        
+       
     scheduler->Run(nextThread); // returns when we've been signalled
 }
 
@@ -319,7 +335,7 @@ NachOSThread::ThreadStackAllocate (VoidFunctionPtr func, int arg)
 }
 
 #ifdef USER_PROGRAM
-#include "machine.h"
+
 
 //----------------------------------------------------------------------
 // NachOSThread::SaveUserState

@@ -39,7 +39,7 @@
 
 #include "copyright.h"
 #include "utility.h"
-
+#include "list.h"
 #ifdef USER_PROGRAM
 #include "machine.h"
 #include "addrspace.h"
@@ -88,6 +88,7 @@ class NachOSThread {
 
     // basic thread operations
     static int pCount;
+    static int threadCount;
     void ThreadFork(VoidFunctionPtr func, int arg); 	// Make thread run (*func)(arg)
     void YieldCPU();  				// Relinquish the CPU if any 
 						// other thread is runnable
@@ -103,11 +104,17 @@ class NachOSThread {
 
     int getPID();
     int getPPID();
-
     NachOSThread *parent;
-    int child_PIDs[];
+    int numInst;
+    int Child_Status[40];
 
-    int child_Count;
+    int Child_ReturnValues[40];
+
+    int NumberOfChildren;
+
+    int WaitingFor;
+
+    List *ChildThreadPointer;
 
     void ThreadStackAllocate(VoidFunctionPtr func, int arg);
                         // Allocate a stack for thread.

@@ -98,7 +98,9 @@ Machine::OneInstruction(Instruction *instr)
     int nextLoadValue = 0; 	// record delayed load operation, to apply
 				// in the future
 
-    // Fetch instruction 
+    // Fetch instruction
+    currentThread->numInst++;                //Increment value of numInst on reading an instruction to keep track of total number of instructions executed by any thread/process.
+
     if (!machine->ReadMem(registers[PCReg], 4, &raw))
 	return;			// exception occurred
     instr->value = raw;
